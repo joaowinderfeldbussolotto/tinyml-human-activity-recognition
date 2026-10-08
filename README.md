@@ -4,6 +4,25 @@ Projeto final de IA Embarcada e Modelos Compactos. Um acelerômetro e um girosc�
 
 Os slides da apresentação estão em `slides/slides.pdf`.
 
+## Sumário
+
+- [1. Como funciona](#1-como-funciona)
+- [2. Estrutura de pastas](#2-estrutura-de-pastas)
+- [3. Os dados](#3-os-dados)
+- [4. Como rodar](#4-como-rodar)
+  - [4.1 Treinar (opcional)](#41-treinar-opcional)
+  - [4.2 Compilar](#42-compilar)
+  - [4.3 Simular no Wokwi](#43-simular-no-wokwi)
+- [5. Resultados](#5-resultados)
+- [6. Limitações](#6-limitações)
+- [7. Wokwi CLI](#7-wokwi-cli)
+  - [Instalação](#instalação)
+  - [Token](#token)
+  - [Como usar](#como-usar)
+  - [Como construir um cenário](#como-construir-um-cenário)
+  - [Documentação](#documentação)
+- [8. Créditos](#8-créditos)
+
 ## 1. Como funciona
 
 O caminho do dado, do sensor até a resposta, tem cinco etapas. Cada uma tem um arquivo em `main/`.
