@@ -2,7 +2,7 @@
 
 Projeto final de IA Embarcada e Modelos Compactos. Um acelerômetro e um giroscópio (MPU6050) medem o movimento, uma rede neural pequena decide se a pessoa está andando, subindo escada, descendo escada, sentada, em pé ou deitada, e tudo isso roda dentro do ESP32-S3, simulado no Wokwi.
 
-O relatório com os resultados está em [RELATORIO.md](RELATORIO.md) e os slides da apresentação estão em `slides/slides.pdf`.
+Os slides da apresentação estão em `slides/slides.pdf`.
 
 ## 1. Como funciona
 
@@ -25,8 +25,7 @@ har-esp32s3/
   simulacao/          cenários do Wokwi (movimento real e posturas fixas), o script que gera
                       eles e os logs seriais
   slides/             slides.html, slides.pdf e o script que gera o PDF
-  docs/               figuras do relatório
-  RELATORIO.md/.pdf   relatório com os resultados
+  docs/               figuras do treino (janelas, curvas e matriz de confusão)
   diagram.json        placa ESP32-S3 + MPU6050 para o Wokwi
   wokwi.toml          configuração do Wokwi
   sdkconfig.defaults  configuração do ESP-IDF
@@ -82,7 +81,7 @@ Em hardware, apague a linha `CONFIG_NN_ANSI_C=y` do `sdkconfig.defaults` para us
 
 ## 5. Resultados
 
-Todos os números abaixo foram medidos nas execuções descritas e estão detalhados no relatório.
+Todos os números abaixo foram medidos nas execuções descritas.
 
 | Modelo | Tamanho | Acurácia no teste (2947 janelas) |
 | --- | --- | --- |
@@ -101,7 +100,7 @@ No Wokwi, rodando as 60 janelas de demonstração, o chip acertou 58 e a saída 
 
 ## 7. Fluxo de trabalho (git flow)
 
-O repositório segue o git flow. A `main` guarda só versões prontas, a `develop` junta o trabalho em andamento e cada tarefa foi feita numa branch `feature/...` que sai da `develop` e volta para ela com `git merge --no-ff`. As branches são `feature/treino` (notebook e modelo), `feature/firmware` (firmware e cenários do Wokwi) e `feature/docs` (relatório e slides). A versão final recebeu a tag `v1.0`. Cada integrante fez commits com o próprio usuário.
+O repositório segue o git flow. A `main` guarda só versões prontas, a `develop` junta o trabalho em andamento e cada tarefa foi feita numa branch `feature/...` que sai da `develop` e volta para ela com `git merge --no-ff`. As branches são `feature/treino` (notebook e modelo), `feature/firmware` (firmware e cenários do Wokwi) e `feature/docs` (slides). A versão final recebeu a tag `v1.0`. Cada integrante fez commits com o próprio usuário.
 
 ## 8. Créditos
 
