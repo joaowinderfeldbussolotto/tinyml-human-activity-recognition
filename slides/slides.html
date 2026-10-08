@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>HAR no ESP32-S3</title>
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  :root {
+    --fundo: #fcfcfb; --texto: #1c1c1a; --suave: #5a5955; --linha: #d9d8d3;
+    --azul: #2a78d6; --laranja: #eb6834; --verde: #1baf7a; --cinza: #f1f0ec;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--fundo); color: var(--texto);
+    font-family: 'DejaVu Sans', 'Helvetica Neue', Arial, sans-serif; }
+  .slide { width: 1280px; height: 720px; padding: 52px 64px 40px; position: relative;
+    page-break-after: always; break-after: page; overflow: hidden; background: var(--fundo); }
+  .slide:last-child { page-break-after: auto; break-after: auto; }
+  h1 { font-size: 40px; margin: 0 0 6px; letter-spacing: -0.5px; }
+  h2 { font-size: 34px; margin: 0 0 22px; letter-spacing: -0.3px; }
+  h2::after { content: ""; display: block; width: 56px; height: 4px; background: var(--azul); margin-top: 10px; border-radius: 2px; }
+  p, li { font-size: 22px; line-height: 1.45; margin: 0 0 12px; }
+  ul { margin: 0; padding-left: 26px; }
+  .suave { color: var(--suave); }
+  .num { position: absolute; right: 64px; bottom: 26px; font-size: 14px; color: var(--suave); }
+  .rodape { position: absolute; left: 64px; bottom: 26px; font-size: 14px; color: var(--suave); }
+  .cols { display: flex; gap: 36px; }
+  .cols > div { flex: 1; min-width: 0; }
+  img { max-width: 100%; display: block; }
+  table { border-collapse: collapse; width: 100%; font-size: 21px; }
+  th, td { text-align: left; padding: 9px 14px; border-bottom: 1px solid var(--linha); }
+  th { font-size: 16px; text-transform: uppercase; letter-spacing: .5px; color: var(--suave); border-bottom: 2px solid var(--texto); }
+  td.d, th.d { text-align: right; font-variant-numeric: tabular-nums; }
+  .cartao { background: var(--cinza); border-radius: 10px; padding: 18px 22px; }
+  .grande { font-size: 56px; font-weight: 700; line-height: 1; letter-spacing: -1px; }
+  .rotulo { font-size: 17px; color: var(--suave); margin-top: 6px; }
+  pre { margin: 0; font-family: 'DejaVu Sans Mono', monospace; font-size: 14.5px; line-height: 1.38;
+    background: #1b1d21; color: #e6e6e1; border-radius: 10px; padding: 16px 18px; overflow: hidden; }
+  pre .ok { color: #7ee0b0; } pre .erro { color: #ff9b78; } pre .dim { color: #8c8f96; }
+  code { font-family: 'DejaVu Sans Mono', monospace; font-size: .85em; background: var(--cinza); padding: 1px 6px; border-radius: 4px; }
+  .fluxo { display: flex; align-items: stretch; gap: 0; margin: 8px 0 20px; }
+  .caixa { flex: 1; border: 2px solid var(--azul); border-radius: 10px; padding: 14px 12px; text-align: center; background: #fff; }
+  .caixa b { display: block; font-size: 20px; margin-bottom: 4px; }
+  .caixa span { font-size: 15px; color: var(--suave); }
+  .seta { width: 34px; align-self: center; text-align: center; font-size: 28px; color: var(--suave); }
+  .barra { height: 26px; border-radius: 4px; }
+  .linha-barra { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .linha-barra .nome { width: 190px; font-size: 20px; }
+  .linha-barra .valor { font-size: 20px; font-variant-numeric: tabular-nums; }
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="slide" style="padding-top:170px">
+  <p class="suave" style="font-size:20px;margin-bottom:18px">IA Embarcada e Modelos Compactos · Projeto final</p>
+  <h1 style="font-size:58px;line-height:1.1;max-width:1000px">Reconhecimento de atividade humana no ESP32-S3</h1>
+  <p style="font-size:26px;margin-top:26px;max-width:900px" class="suave">Um acelerômetro e um giroscópio, uma rede neural de 4630 parâmetros comprimida para int8, e tudo rodando no chip, simulado no Wokwi.</p>
+  <div style="position:absolute;left:64px;bottom:60px;width:160px;height:6px;background:var(--azul);border-radius:3px"></div>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <h2>O problema</h2>
+  <div class="cols">
+    <div>
+      <p>Dado o movimento de uma pessoa, dizer o que ela está fazendo: andando, subindo escada, descendo escada, sentada, em pé ou deitada.</p>
+      <p>O modelo roda dentro de um microcontrolador, perto do sensor. Assim a decisão acontece no próprio dispositivo, sem mandar o sinal bruto para outro lugar.</p>
+      <p>Isso obriga o modelo a ser pequeno. Neste projeto ele ficou com 9856 bytes.</p>
+    </div>
+    <div>
+      <div class="cartao" style="margin-bottom:16px"><b style="font-size:20px">O que o enunciado pede</b>
+        <ul style="margin-top:8px">
+          <li>coleta de dados de sensores</li>
+          <li>treino com dataset público</li>
+          <li>conversão e compressão do modelo</li>
+          <li>pipeline de inferência no dispositivo</li>
+        </ul>
+      </div>
+      <p class="suave" style="font-size:19px">Hardware: ESP32-S3 e MPU6050 (acelerômetro e giroscópio), simulados no Wokwi.</p>
+    </div>
+  </div>
+  <div class="num">2</div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <h2>Os dados: UCI HAR</h2>
+  <div class="cols" style="margin-bottom:14px">
+    <div>
+      <p>30 voluntários com um celular na cintura, 6 atividades, sensor a 50 Hz. Os dados já vêm em janelas de 128 amostras (2,56 s).</p>
+      <p>São usados 6 canais, os mesmos que o MPU6050 entrega: aceleração (x, y, z, em g) e giroscópio (x, y, z, em rad/s).</p>
+    </div>
+    <div>
+      <table>
+        <tr><th>Conjunto</th><th class="d">Janelas</th><th class="d">Pessoas</th></tr>
+        <tr><td>Treino</td><td class="d">5952</td><td class="d">17</td></tr>
+        <tr><td>Validação</td><td class="d">1400</td><td class="d">4</td></tr>
+        <tr><td>Teste</td><td class="d">2947</td><td class="d">9</td></tr>
+      </table>
+    </div>
+  </div>
+  <img src="../docs/janelas_por_classe.png" style="margin:6px auto 0;max-height:300px;width:auto">
+  <p class="suave" style="font-size:17px;margin-top:8px">Uma janela de cada atividade. A separação é por pessoa: o teste mede pessoas que o modelo nunca viu.</p>
+  <div class="num">3</div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <h2>O modelo</h2>
+  <div class="fluxo">
+    <div class="caixa"><b>Entrada</b><span>128 × 6<br>janela normalizada</span></div><div class="seta">→</div>
+    <div class="caixa"><b>Conv 16</b><span>kernel 5<br>ReLU</span></div><div class="seta">→</div>
+    <div class="caixa"><b>Pool</b><span>÷ 4</span></div><div class="seta">→</div>
+    <div class="caixa"><b>Conv 32</b><span>kernel 5<br>ReLU</span></div><div class="seta">→</div>
+    <div class="caixa"><b>Pool</b><span>÷ 4</span></div><div class="seta">→</div>
+    <div class="caixa"><b>Densa 6</b><span>softmax</span></div>
+  </div>
+  <div class="cols">
+    <div>
+      <p>Cada convolução desliza pelo tempo procurando padrões, como o balanço de uma passada. O pooling reduz o tamanho. A camada final dá a probabilidade de cada atividade.</p>
+      <p>O <code>Conv2D</code> com kernel <code>(5, 1)</code> é, na prática, uma convolução 1D. Foi escolhido por ser a convolução mais bem suportada no TFLite Micro.</p>
+    </div>
+    <div style="display:flex;gap:20px">
+      <div class="cartao" style="flex:1"><div class="grande">4630</div><div class="rotulo">parâmetros</div></div>
+      <div class="cartao" style="flex:1"><div class="grande">5</div><div class="rotulo">operações do TFLite no modelo final</div></div>
+    </div>
+  </div>
+  <table style="margin-top:22px;width:62%">
+    <tr><th>Camada</th><th class="d">Parâmetros</th></tr>
+    <tr><td>Conv 16 (6 canais, kernel 5)</td><td class="d">496</td></tr>
+    <tr><td>Conv 32 (16 canais, kernel 5)</td><td class="d">2592</td></tr>
+    <tr><td>Densa (256 entradas, 6 saídas)</td><td class="d">1542</td></tr>
+  </table>
+  <div class="num">4</div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <h2>Resultado do treino</h2>
+  <div class="cols">
+    <div style="flex:.9">
+      <div class="cartao" style="margin-bottom:18px"><div class="grande" style="color:var(--azul)">89,5%</div><div class="rotulo">acurácia em 2947 janelas de 9 pessoas novas (modelo int8)</div></div>
+      <table>
+        <tr><th>Atividade</th><th class="d">Acerto</th></tr>
+        <tr><td>andando</td><td class="d">96,0%</td></tr>
+        <tr><td>subindo escada</td><td class="d">90,0%</td></tr>
+        <tr><td>descendo escada</td><td class="d">93,1%</td></tr>
+        <tr><td>sentado</td><td class="d" style="color:var(--laranja);font-weight:700">73,1%</td></tr>
+        <tr><td>em pé</td><td class="d">89,7%</td></tr>
+        <tr><td>deitado</td><td class="d">95,0%</td></tr>
+      </table>
+    </div>
+    <div style="flex:1.1">
+      <img src="../docs/matriz_confusao_int8.png">
+      <p class="suave" style="font-size:17px">O maior erro é sentado previsto como em pé (104 de 491). São duas posturas paradas e o sensor sente quase a mesma coisa.</p>
+    </div>
+  </div>
+  <div class="num">5</div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <h2>Compressão para int8</h2>
+  <p>Os números de float32 (4 bytes) são trocados por inteiros de 8 bits, com uma escala e um ponto zero para cada tensor. A escala vem de 300 janelas de treino de exemplo.</p>
+  <div style="margin:22px 0 10px">
+    <div class="linha-barra"><div class="nome">float32</div><div class="barra" style="width:440px;background:#9aa5b1"></div><div class="valor">21860 B · 89,45%</div></div>
+    <div class="linha-barra"><div class="nome">faixa dinâmica</div><div class="barra" style="width:204px;background:#9aa5b1"></div><div class="valor">10120 B · 89,41%</div></div>
+    <div class="linha-barra"><div class="nome"><b>int8 completo</b></div><div class="barra" style="width:198px;background:var(--azul)"></div><div class="valor"><b>9856 B · 89,48%</b></div></div>
+  </div>
+  <div class="cols" style="margin-top:20px">
+    <div class="cartao"><div class="grande">2,2×</div><div class="rotulo">menor que o float32</div></div>
+    <div class="cartao"><div class="grande">1 janela</div><div class="rotulo">de diferença na acurácia entre float e int8 (em 2947)</div></div>
+    <div class="cartao"><div class="grande">99,66%</div><div class="rotulo">das janelas têm a mesma resposta em float e int8</div></div>
+  </div>
+  <p class="suave" style="font-size:18px;margin-top:20px">O chip faz as contas em inteiros, que são mais rápidas e leves. O arquivo não cai exatamente 4×, porque guarda também a estrutura do modelo e os parâmetros de quantização.</p>
+  <div class="num">6</div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <h2>O pipeline dentro do chip</h2>
+  <div class="fluxo" style="margin:18px 0 36px">
+    <div class="caixa" style="padding:34px 12px"><b>Sensor</b><span>MPU6050 por I2C<br>50 Hz</span></div><div class="seta">→</div>
+    <div class="caixa" style="padding:34px 12px"><b>Janela</b><span>128 amostras<br>nova a cada 64</span></div><div class="seta">→</div>
+    <div class="caixa" style="padding:34px 12px"><b style="font-size:16px;white-space:nowrap">Pré-processamento</b><span>normaliza e<br>quantiza (int8)</span></div><div class="seta">→</div>
+    <div class="caixa" style="padding:34px 12px"><b>Modelo</b><span>TFLite Micro<br>int8</span></div><div class="seta">→</div>
+    <div class="caixa" style="padding:34px 12px"><b>Saída</b><span>atividade e<br>probabilidade</span></div>
+  </div>
+  <p style="max-width:1000px;font-size:24px">A inferência leva centenas de milissegundos e as amostras chegam a cada 20 ms. Por isso a leitura do sensor fica numa tarefa do FreeRTOS com prioridade maior, e a inferência na tarefa principal.</p>
+  <p class="suave" style="max-width:1000px;font-size:19px">Assim nenhuma amostra se perde enquanto o modelo roda: a tarefa do sensor monta a janela e avisa a tarefa principal quando ela está completa.</p>
+  <div class="num">7</div>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <h2>Demonstração no Wokwi</h2>
+  <div class="cols">
+    <div style="flex:.8">
+      <svg viewBox="0 0 360 250" width="100%" role="img" aria-label="Ligação do ESP32-S3 com o MPU6050">
+        <rect x="14" y="30" width="120" height="190" rx="8" fill="#fff" stroke="#2a78d6" stroke-width="2.5"/>
+        <text x="74" y="56" text-anchor="middle" font-size="15" font-weight="700" fill="#1c1c1a">ESP32-S3</text>
+        <rect x="226" y="60" width="120" height="150" rx="8" fill="#fff" stroke="#eb6834" stroke-width="2.5"/>
+        <text x="286" y="86" text-anchor="middle" font-size="15" font-weight="700" fill="#1c1c1a">MPU6050</text>
+        <g font-size="13" fill="#1c1c1a">
+          <text x="124" y="104" text-anchor="end">GPIO 8</text>
+          <text x="124" y="132" text-anchor="end">GPIO 9</text>
+          <text x="124" y="160" text-anchor="end">3V3</text>
+          <text x="124" y="188" text-anchor="end">GND</text>
+          <text x="236" y="104">SDA</text><text x="236" y="132">SCL</text><text x="236" y="160">VCC</text><text x="236" y="188">GND</text>
+        </g>
+        <g stroke-width="2.5" fill="none">
+          <line x1="134" y1="100" x2="226" y2="100" stroke="#1baf7a"/>
+          <line x1="134" y1="128" x2="226" y2="128" stroke="#7b5fd0"/>
+          <line x1="134" y1="156" x2="226" y2="156" stroke="#d6422f"/>
+          <line x1="134" y1="184" x2="226" y2="184" stroke="#333"/>
+        </g>
+        <text x="180" y="240" text-anchor="middle" font-size="12" fill="#5a5955">diagrama da ligação (diagram.json)</text>
+      </svg>
+      <p style="font-size:18px" class="suave">O MPU6050 do Wokwi tem controles de aceleração e giro que ficam parados. Para ele se mexer, um cenário do <code>wokwi-cli</code> muda os controles a cada 20 ms com uma janela real do dataset.</p>
+    </div>
+    <div style="flex:1.2">
+<pre style="font-size:12.6px"><span class="dim"># saída serial do chip simulado, cenário "andando" (log completo em simulacao/logs/)</span>
+  # | real             | previsto         | prob | pre(us) | inf(us) | igual ao PC
+  0 | andando          | andando          | 1.00 |   11019 |  279230 | sim
+ <span class="dim">...</span>
+ 36 | sentado          | em pe            | 0.67 |   10700 |  279299 | sim
+ <span class="dim">...</span>
+<span class="ok">Acuracia no chip: 58/60 (96.7%)
+Saida int8 identica a do PC: 60/60 janelas</span>
+Tempo medio: pre-processamento 10841 us, inferencia 279276 us
+
+=== MODO LIVE: lendo o MPU6050 a 50 Hz ===
+[live] janela 1: andando          (prob 1.00)</pre>
+    </div>
+  </div>
+  <div class="num">8</div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <h2>Verificação no chip simulado</h2>
+  <div class="cols" style="margin-bottom:18px">
+    <div class="cartao"><div class="grande" style="color:var(--azul)">60/60</div><div class="rotulo">janelas com saída int8 idêntica à do PC</div></div>
+    <div class="cartao"><div class="grande">58/60</div><div class="rotulo">janelas classificadas certo no replay</div></div>
+    <div class="cartao"><div class="grande">6/6</div><div class="rotulo">atividades certas no modo live, lendo o MPU6050 simulado</div></div>
+  </div>
+  <table style="margin-bottom:14px">
+    <tr><th>Atividade real</th><th>Previsto pelo chip (live)</th><th class="d">Prob.</th></tr>
+    <tr><td>andando</td><td>andando</td><td class="d">1,00</td></tr>
+    <tr><td>subindo escada</td><td>subindo escada</td><td class="d">1,00</td></tr>
+    <tr><td>descendo escada</td><td>descendo escada</td><td class="d">0,89</td></tr>
+    <tr><td>sentado</td><td>sentado</td><td class="d">0,76</td></tr>
+    <tr><td>em pé</td><td>em pé</td><td class="d">0,98</td></tr>
+    <tr><td>deitado</td><td>deitado</td><td class="d">1,00</td></tr>
+  </table>
+  <p style="font-size:18px" class="suave">As 128 amostras lidas pelo firmware bateram com o dataset (diferença máxima de 0,0003). Resultados iguais no ESP-IDF 5.5.5 e 6.1. O modo live testou uma janela por atividade: mostra que a cadeia funciona, não mede acurácia.</p>
+  <div class="num">9</div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <h2>Limitações e conclusão</h2>
+  <div class="cols">
+    <div>
+      <p><b>Limitações</b></p>
+      <ul>
+        <li>Sentado e em pé se confundem (73% de acerto em sentado).</li>
+        <li>O dataset vem de um celular na cintura. Outra posição pede dados novos.</li>
+      </ul>
+    </div>
+    <div>
+      <p><b>O que ficou</b></p>
+      <ul>
+        <li>4630 parâmetros, 9856 bytes, 89,5% em pessoas novas.</li>
+        <li>int8 deixou o modelo 2,2× menor sem perder acurácia.</li>
+        <li>O chip simulado dá a mesma saída que o PC e reconhece as 6 atividades lendo o sensor.</li>
+        <li>Próximo passo: testar em hardware e melhorar sentado × em pé.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="suave" style="margin-top:22px;font-size:18px">Dataset: Anguita et al., 2013 (UCI HAR, CC BY 4.0). TensorFlow Lite Micro via espressif/esp-tflite-micro.</p>
+  <div class="num">10</div>
+</section>
+
+</body>
+</html>
