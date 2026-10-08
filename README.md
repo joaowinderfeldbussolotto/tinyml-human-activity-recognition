@@ -66,7 +66,7 @@ Na primeira vez o ESP-IDF baixa o componente `espressif/esp-tflite-micro`, entã
 
 Pela extensão do VS Code, com a pasta aberta: `Wokwi: Start Simulator`. A serial mostra primeiro o modo replay (60 janelas reais embutidas no firmware) e depois o modo live (lendo o MPU6050).
 
-No modo live o MPU6050 do Wokwi fica parado nos valores que você colocar nos controles dele. Para ele reproduzir uma gravação real, use um dos cenários do `wokwi-cli`:
+No modo live o MPU6050 do Wokwi fica parado nos valores que você colocar nos controles dele. Para ele reproduzir uma gravação real, use um dos cenários do `wokwi-cli` (veja a seção 7):
 
 ```sh
 export WOKWI_CLI_TOKEN=...   # token em wokwi.com/dashboard/ci
@@ -74,10 +74,6 @@ wokwi-cli --scenario simulacao/cenarios/0_andando.yaml .
 ```
 
 Cada cenário muda os controles do MPU6050 a cada 20 ms com uma janela real do dataset (uma para cada atividade). Para gerar de novo, rode `python simulacao/gerar_cenarios.py` (precisa de NumPy). Em `simulacao/posturas/` há três cenários mais simples, com valores fixos de aceleração para sentado, em pé e deitado. Os logs de todas as execuções estão em `simulacao/logs/`.
-
-### 4.4 Placa real
-
-Em hardware, apague a linha `CONFIG_NN_ANSI_C=y` do `sdkconfig.defaults` para usar os kernels otimizados do ESP32-S3 (veja a seção 6) e ligue o MPU6050 em SDA = GPIO 8 e SCL = GPIO 9. Eu não testei em placa real. Na placa, o eixo x do sensor deve apontar para cima quando a pessoa está em pé, como no celular do dataset.
 
 ## 5. Resultados
 
@@ -98,9 +94,84 @@ No Wokwi, rodando as 60 janelas de demonstração, o chip acertou 58 e a saída 
 - Não testei em placa física nem com um MPU6050 real.
 - O dataset foi gravado com um celular na cintura. Com o sensor em outro lugar ou em outra orientação o modelo precisaria de novos dados.
 
-## 7. Fluxo de trabalho (git flow)
+## 7. Wokwi CLI
 
-O repositório segue o git flow. A `main` guarda só versões prontas, a `develop` junta o trabalho em andamento e cada tarefa foi feita numa branch `feature/...` que sai da `develop` e volta para ela com `git merge --no-ff`. As branches são `feature/treino` (notebook e modelo), `feature/firmware` (firmware e cenários do Wokwi) e `feature/docs` (slides). A versão final recebeu a tag `v1.0`. Cada integrante fez commits com o próprio usuário.
+O `wokwi-cli` roda a simulação do Wokwi pelo terminal, sem a interface gráfica. Serve para testes automáticos e para executar cenários.
+
+**O que são cenários.** Um cenário é um arquivo YAML com uma lista de passos que o `wokwi-cli` executa durante a simulação, como "espere esta mensagem na serial, mude o valor deste sensor, espere 500 ms". Eles simulam o mundo em volta do chip: um sensor simulado fica parado no valor inicial até alguém mudá-lo, e o cenário faz isso sem precisar mexer na interface.
+
+### Instalação
+
+```sh
+# Linux e macOS
+curl -L https://wokwi.com/ci/install.sh | sh
+
+# Windows (PowerShell)
+iwr https://wokwi.com/ci/install.ps1 -useb | iex
+```
+
+Também dá para baixar o executável na página de releases do GitHub e colocá-lo numa pasta do `PATH`. Confira com `wokwi-cli --version`.
+
+### Token
+
+Crie um token em [wokwi.com/dashboard/ci](https://wokwi.com/dashboard/ci) e defina a variável `WOKWI_CLI_TOKEN`:
+
+```sh
+export WOKWI_CLI_TOKEN=wok_...        # Linux e macOS
+$env:WOKWI_CLI_TOKEN="wok_..."        # Windows (PowerShell)
+```
+
+O token é uma senha. Não coloque num arquivo do repositório.
+
+### Como usar
+
+Na pasta do projeto, que precisa ter `wokwi.toml` e `diagram.json` (o comando `wokwi-cli init` cria os dois):
+
+```sh
+wokwi-cli .
+```
+
+| Opção | O que faz |
+| --- | --- |
+| `--timeout <ms>` | tempo máximo da simulação (padrão 30000) |
+| `--scenario <arquivo>` | executa um cenário |
+| `--serial-log-file <arquivo>` | salva a saída serial em um arquivo |
+| `--expect-text <texto>` | falha se o texto não aparecer na serial |
+| `--fail-text <texto>` | falha se o texto aparecer na serial |
+
+### Como construir um cenário
+
+Um cenário tem `name`, `version: 1` e a lista `steps`:
+
+```yaml
+name: exemplo
+version: 1
+steps:
+  - wait-serial: 'Pronto'
+  - set-control:
+      part-id: dht
+      control: humidity
+      value: 39
+  - delay: 500ms
+```
+
+| Passo | O que faz |
+| --- | --- |
+| `delay` | espera um tempo (`500ms`, `2s`) |
+| `wait-serial` | espera um texto aparecer na serial |
+| `write-serial` | envia texto para a serial |
+| `set-control` | muda o controle de uma peça (`part-id`, `control`, `value`) |
+| `expect-pin` | confere o valor de um pino |
+
+O `part-id` é o `id` da peça no `diagram.json`. Os nomes dos controles de cada peça estão na página dela na documentação. Para passos repetitivos, como reproduzir uma gravação amostra por amostra, vale gerar o YAML com um script. A documentação marca os cenários como alfa, e os tempos são tempos simulados.
+
+### Documentação
+
+- [Primeiros passos](https://docs.wokwi.com/wokwi-ci/getting-started)
+- [Instalação do CLI](https://docs.wokwi.com/wokwi-ci/cli-installation)
+- [Uso do CLI](https://docs.wokwi.com/wokwi-ci/cli-usage)
+- [Cenários de automação](https://docs.wokwi.com/wokwi-ci/automation-scenarios)
+- [Exemplo de página de peça (MPU6050)](https://docs.wokwi.com/parts/wokwi-mpu6050)
 
 ## 8. Créditos
 
