@@ -1,0 +1,19 @@
+# Valores fixos: média da aceleração das janelas de demonstração de 'deitado' (giroscópio em 0).
+name: deitado
+version: 1
+steps:
+  - set-control:
+      part-id: imu1
+      control: accelX
+      value: 0.09
+  - set-control:
+      part-id: imu1
+      control: accelY
+      value: 0.85
+  - set-control:
+      part-id: imu1
+      control: accelZ
+      value: 0.35
+  - wait-serial: 'MODO LIVE'
+  - wait-serial: '(prob'
+  - delay: 3500ms

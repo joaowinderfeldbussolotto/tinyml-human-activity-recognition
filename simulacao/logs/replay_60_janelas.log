@@ -1,0 +1,70 @@
+=== HAR no ESP32-S3: reconhecimento de atividade com acelerometro ===
+Modelo int8 carregado. Arena usada: 4524 bytes
+
+=== MODO REPLAY: 60 janelas reais do conjunto de teste ===
+  # | real             | previsto         | prob | pre(us) | inf(us) | igual ao PC
+  0 | andando          | andando          | 1.00 |   11019 |  279230 | sim
+  1 | andando          | andando          | 1.00 |   11023 |  279230 | sim
+  2 | andando          | andando          | 1.00 |   11003 |  279302 | sim
+  3 | andando          | andando          | 1.00 |   11028 |  279301 | sim
+  4 | andando          | andando          | 1.00 |   10992 |  279301 | sim
+  5 | andando          | andando          | 0.98 |   10975 |  279302 | sim
+  6 | andando          | andando          | 1.00 |   11014 |  279301 | sim
+  7 | andando          | andando          | 0.87 |   11010 |  279303 | sim
+  8 | andando          | andando          | 0.99 |   11013 |  279301 | sim
+  9 | andando          | andando          | 1.00 |   11010 |  279302 | sim
+ 10 | subindo escada   | subindo escada   | 1.00 |   11044 |  279302 | sim
+ 11 | subindo escada   | subindo escada   | 1.00 |   11020 |  279303 | sim
+ 12 | subindo escada   | subindo escada   | 0.95 |   11033 |  279301 | sim
+ 13 | subindo escada   | subindo escada   | 1.00 |   11028 |  279303 | sim
+ 14 | subindo escada   | subindo escada   | 1.00 |   11012 |  279302 | sim
+ 15 | subindo escada   | subindo escada   | 1.00 |   11028 |  279303 | sim
+ 16 | subindo escada   | subindo escada   | 1.00 |   10998 |  279302 | sim
+ 17 | subindo escada   | descendo escada  | 0.98 |   11022 |  279303 | sim
+ 18 | subindo escada   | subindo escada   | 0.97 |   11031 |  279302 | sim
+ 19 | subindo escada   | subindo escada   | 1.00 |   11024 |  279301 | sim
+ 20 | descendo escada  | descendo escada  | 0.89 |   11002 |  279302 | sim
+ 21 | descendo escada  | descendo escada  | 0.75 |   11035 |  279302 | sim
+ 22 | descendo escada  | descendo escada  | 0.95 |   11011 |  279302 | sim
+ 23 | descendo escada  | descendo escada  | 1.00 |   11029 |  279158 | sim
+ 24 | descendo escada  | descendo escada  | 1.00 |   11033 |  279159 | sim
+ 25 | descendo escada  | descendo escada  | 0.86 |   11014 |  279303 | sim
+ 26 | descendo escada  | descendo escada  | 0.99 |   10981 |  279301 | sim
+ 27 | descendo escada  | descendo escada  | 1.00 |   11028 |  279302 | sim
+ 28 | descendo escada  | descendo escada  | 1.00 |   10996 |  279302 | sim
+ 29 | descendo escada  | descendo escada  | 1.00 |   11022 |  279158 | sim
+ 30 | sentado          | sentado          | 0.76 |   10468 |  279277 | sim
+ 31 | sentado          | sentado          | 1.00 |   10511 |  279278 | sim
+ 32 | sentado          | sentado          | 0.50 |   10321 |  279264 | sim
+ 33 | sentado          | sentado          | 0.76 |   10645 |  279281 | sim
+ 34 | sentado          | sentado          | 1.00 |   10510 |  279278 | sim
+ 35 | sentado          | sentado          | 1.00 |   10505 |  279277 | sim
+ 36 | sentado          | em pe            | 0.67 |   10700 |  279299 | sim
+ 37 | sentado          | sentado          | 1.00 |   10686 |  279282 | sim
+ 38 | sentado          | sentado          | 0.99 |   10562 |  279277 | sim
+ 39 | sentado          | sentado          | 0.80 |   10565 |  279281 | sim
+ 40 | em pe            | em pe            | 0.98 |   10665 |  279281 | sim
+ 41 | em pe            | em pe            | 0.97 |   10619 |  279281 | sim
+ 42 | em pe            | em pe            | 0.98 |   10912 |  279302 | sim
+ 43 | em pe            | em pe            | 0.96 |   10888 |  279302 | sim
+ 44 | em pe            | em pe            | 0.87 |   10865 |  279303 | sim
+ 45 | em pe            | em pe            | 0.95 |   10562 |  279278 | sim
+ 46 | em pe            | em pe            | 0.93 |   10582 |  279281 | sim
+ 47 | em pe            | em pe            | 0.94 |   10628 |  279281 | sim
+ 48 | em pe            | em pe            | 0.93 |   10575 |  279282 | sim
+ 49 | em pe            | em pe            | 0.98 |   10975 |  279302 | sim
+ 50 | deitado          | deitado          | 1.00 |   11058 |  279301 | sim
+ 51 | deitado          | deitado          | 1.00 |   10691 |  279300 | sim
+ 52 | deitado          | deitado          | 1.00 |   10643 |  279281 | sim
+ 53 | deitado          | deitado          | 1.00 |   10606 |  279209 | sim
+ 54 | deitado          | deitado          | 1.00 |   11018 |  279087 | sim
+ 55 | deitado          | deitado          | 1.00 |   10763 |  279302 | sim
+ 56 | deitado          | deitado          | 1.00 |   10636 |  279208 | sim
+ 57 | deitado          | deitado          | 1.00 |   10602 |  279207 | sim
+ 58 | deitado          | deitado          | 1.00 |   10695 |  279299 | sim
+ 59 | deitado          | deitado          | 1.00 |   10551 |  279208 | sim
+Acuracia no chip: 58/60 (96.7%)
+Saida int8 identica a do PC: 60/60 janelas
+Tempo medio: pre-processamento 10841 us, inferencia 279276 us
+MPU6050: WHO_AM_I = 0x68
+

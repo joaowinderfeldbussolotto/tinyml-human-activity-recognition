@@ -1,0 +1,13 @@
+CONFIG_FLASHMODE_QIO=y
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+
+CONFIG_PARTITION_TABLE_OFFSET=0xc000
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+CONFIG_PARTITION_TABLE_FILENAME="partitions.csv"
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+
+# O Wokwi nao executa o assembly do esp-nn para o S3 (a saida do modelo fica travada).
+# Com os kernels em C funciona. Em hardware real pode apagar esta linha.
+CONFIG_NN_ANSI_C=y
